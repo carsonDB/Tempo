@@ -1,7 +1,7 @@
 from __future__ import division
 import tensorflow as tf
 
-from tempo.config.config_agent import FLAGS, VARS
+from config.config_agent import FLAGS, VARS
 
 
 class Input_proto(object):
@@ -17,7 +17,6 @@ class Input_proto(object):
         self.queue_type = self.QUEUE['type']
         self.capacity = self.QUEUE['capacity']
         self.batch_size = FLAGS['batch_size']
-        self.raw_size = self.INPUT['raw_size']
         self.num_thread = self.QUEUE['num_thread']
         self.example_size = self.INPUT['example_size']
         self.sess = VARS['sess']
@@ -31,7 +30,8 @@ class Input_proto(object):
             # inputs -> inputs_batch
         inputs_batch = self.async(inputs)
         # visualize preprocessed images
-        tf.image_summary('images', inputs_batch[0])
+        if inputs_batch.get_shape().as_list()[-1] == 3:
+            tf.image_summary('images', inputs_batch[0])
 
         return inputs_batch
 

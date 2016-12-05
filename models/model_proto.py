@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 # import local file
-from tempo.config.config_agent import FLAGS, VARS
+from config.config_agent import FLAGS, VARS
 
 
 class Model_proto(object):
@@ -73,7 +73,7 @@ class Model_proto(object):
 
         return loss_averages_op
 
-    def validate(self, logits, labels, top):
+    def eval(self, logits, labels, top):
         return tf.nn.in_top_k(logits, labels, top)
 
     def test(self):

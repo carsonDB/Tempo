@@ -8,15 +8,15 @@ Return:
 from __future__ import division
 import tensorflow as tf
 
-from tempo.config.config_agent import FLAGS, VARS
-from tempo.kits import affine_transform, variable_with_weight_decay
-from tempo.models.proto import Proto
+from config.config_agent import FLAGS, VARS
+from kits import affine_transform, variable_with_weight_decay
+from models.model_proto import Model_proto
 
 
-class Model(Proto):
-    """rnn + attend
+class Model(Model_proto):
+    """rnn (LSTM)
     """
-    def __init__(self,):
+    def __init__(self):
         INPUT = FLAGS['input']
         GRAPH = FLAGS['graph']
 
@@ -24,9 +24,9 @@ class Model(Proto):
         self.hidden_size = GRAPH['hidden_size']
         self.num_layer = GRAPH['num_layer']
         self.keep_prob = GRAPH['dropout']
-        self.num_step = INPUT['max_time_steps']
+        super(Model, self).__init__()
 
-    def inference(self, inputs):
+    def infer(self, inputs):
         """
         Args:
             inputs: [batch_size, max_step, ...]
@@ -91,29 +91,22 @@ class Model(Proto):
         # outputs: [batch_size, num_step, num_class]
         return outputs
 
-    def loss(self, logits, labels):
-        # labels: [batch_size, num_step]
-        # logits: [batch_size, num_step, num_class]
+    def loss(self, logits, labels, scope=None):
+        # input labels: [batch_size]
+        # input logits: [batch_size, num_step, num_class]
         raw_shape = logits.get_shape().as_list()
         batch_size, num_step, num_class = raw_shape
-
-        labels = tf.cast(labels, tf.int64)
+        # duplicate labels: [batch] -> [batch, num_step]
+        labels = tf.pack([labels for i in range(num_step)], axis=1)
 
         logits = tf.reshape(logits, [-1, num_class])
         labels = tf.reshape(labels, [-1])
-        return super(Model, self).loss(logits, labels)
 
-    def test(self, inputs, labels, masks, top):
+        return super(Model, self).loss(logits, labels, scope)
 
-        # Build a Graph that computes the logits predictions from the
-        # inference model
-        logits = self.inference(inputs, masks)
+    def eval(self, logits, labels, top):
         # logits: [batch_size, num_step, num_class]
         avg_logits = tf.reduce_mean(logits, reduction_indices=1)
         # avg_logits: [batch_size, num_class]
-        min_labels = tf.reduce_min(labels, reduction_indices=1)
-        # max_labels = tf.reduce_max(labels, reduction_indices=1)
-        # # for debug
-        # VARS['equal_op'] = tf.equal(min_labels, max_labels)
 
-        return tf.nn.in_top_k(avg_logits, min_labels, top)
+        return tf.nn.in_top_k(avg_logits, labels, top)

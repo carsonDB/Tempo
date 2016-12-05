@@ -7,8 +7,8 @@ from __future__ import division
 import os
 import tensorflow as tf
 
-from tempo.config.config_agent import FLAGS, VARS
-from tempo.inputs.input_proto import Input_proto
+from config.config_agent import FLAGS, VARS
+from inputs.input_proto import Input_proto
 
 
 class Reader(Input_proto):

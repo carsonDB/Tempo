@@ -7,9 +7,9 @@ import math
 import numpy as np
 import tensorflow as tf
 
-from tempo.config import config_agent
-from tempo.config.config_agent import FLAGS, VARS
-from tempo.solver import Solver
+from config import config_agent
+from config.config_agent import FLAGS, VARS
+from solver import Solver
 
 
 class Eval_solver(Solver):
@@ -23,18 +23,16 @@ class Eval_solver(Solver):
         super(Eval_solver, self).__init__()
 
     def build_graph(self):
-        assert(isinstance(self.gpus, (tuple, list)) and len(self.gpus) > 0)
         with tf.device('/gpu:%d' % self.gpus[-1]):
              # Build a Graph that computes the logits predictions.
             inputs, labels = self.reader.read()
             # inference model.
             logits = self.model.infer(inputs)
             # Calculate predictions.
-            self.top_k_op = (self.model.test(inputs, labels, self.num_top)
-                             if self.if_test else
-                             self.model.validate(logits, labels, self.num_top))
+            self.top_k_op = self.model.eval(logits, labels, self.num_top)
 
     def init_graph(self):
+        self.init_sess()
         # Restore the moving average version of the learned variables for eval.
         variable_averages = tf.train.ExponentialMovingAverage(
             self.moving_average_decay)
@@ -79,8 +77,8 @@ class Eval_solver(Solver):
             true_count += np.sum(predictions)
 
             precision = true_count / total_sample_count
-            if step % 10 == 0:
-                print('step: %d, precision %f' % (step, precision))
+            # if step % 10 == 0:
+            #     print('step: %d, precision %f' % (step, precision))
 
             step += 1
 

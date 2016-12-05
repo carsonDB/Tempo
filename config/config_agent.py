@@ -44,12 +44,12 @@ def init_FLAGS(mode=None):
     # specific mode variables localize
     if mode is not None:
         unroll_key(mode, config)
-    # sub-mode of eval
-    if mode == 'eval':
-        if args.if_test:
-            unroll_key('test', config)
-        else:
-            unroll_key('valid', config)
+    # # sub-mode of eval
+    # if mode == 'eval':
+    #     if args.if_test:
+    #         unroll_key('test', config)
+    #     else:
+    #         unroll_key('valid', config)
 
     for k, v in config.iteritems():
         FLAGS[k] = v
@@ -98,7 +98,8 @@ FLAGS = {}
 # global variable(build-time vars) cross modeuls
 VARS = {
     'threads': [],
-    'queues': []
+    'queues': [],
+    'output': {}
 }
 
 

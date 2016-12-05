@@ -1,7 +1,7 @@
 import re
 import tensorflow as tf
 
-from tempo.config.config_agent import FLAGS
+from config.config_agent import FLAGS
 
 
 def variable_on_cpu(name, shape, initializer, trainable=True):

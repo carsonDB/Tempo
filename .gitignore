@@ -1,4 +1,4 @@
 *.pyc
 *.jpg
-log
+*.log
 /data

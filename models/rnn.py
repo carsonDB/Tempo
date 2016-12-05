@@ -9,8 +9,8 @@ Return:
 import tensorflow as tf
 from tensorflow.python.ops.rnn import raw_rnn
 
-from tempo.config.config_agent import FLAGS, VARS
-from tempo.models.kits import variable_on_cpu, variable_with_weight_decay
+from config.config_agent import FLAGS, VARS
+from models.kits import variable_on_cpu, variable_with_weight_decay
 
 
 def affine_transform(inputs, dim1, scope_name, stddev=0.1, wd=0.0):

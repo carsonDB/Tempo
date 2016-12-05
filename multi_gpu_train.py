@@ -9,9 +9,9 @@ import numpy as np
 from six.moves import xrange
 import tensorflow as tf
 
-from tempo.config import config_agent
-from tempo.config.config_agent import FLAGS
-from tempo.solver import Solver
+from config import config_agent
+from config.config_agent import FLAGS
+from solver import Solver
 
 
 def average_gradients(tower_grads):

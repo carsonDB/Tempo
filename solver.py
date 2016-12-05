@@ -4,7 +4,7 @@ import traceback
 import tensorflow as tf
 
 # import local files
-from tempo.config.config_agent import FLAGS, VARS
+from config.config_agent import FLAGS, VARS
 
 
 class Solver(object):
@@ -58,8 +58,8 @@ class Solver(object):
 
         # determine reader and model
         # and instantiate a read and a model
-        model_module = import_module('tempo.models.' + self.model_name)
-        read_module = import_module('tempo.inputs.' + self.reader_name)
+        model_module = import_module('models.' + self.model_name)
+        read_module = import_module('inputs.' + self.reader_name)
         self.model = model_module.Model()
         self.reader = read_module.Reader()
 
@@ -82,13 +82,18 @@ class Solver(object):
         optimizer = getattr(tf.train, '%sOptimizer' % name)
         return optimizer(lr, **args)
 
+    def init_sess(self):
+        # initialize variables
+        init_op = tf.group(tf.global_variables_initializer(),
+                           tf.local_variables_initializer())
+        self.sess.run(init_op)
+
     def init_graph(self):
         # Build the summary operation based on the TF collection of Summaries.
         self.summary_op = tf.merge_all_summaries()
         self.saver = tf.train.Saver(tf.global_variables())
-        # initialize variables
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
+        # init session
+        self.init_sess()
         # restore variables if any
         if self.if_restart is False:
             ckpt = tf.train.get_checkpoint_state(self.ckpt_dir)

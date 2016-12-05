@@ -8,9 +8,9 @@ import numpy as np
 from six.moves import xrange
 import tensorflow as tf
 
-from tempo.config import config_agent
-from tempo.config.config_agent import FLAGS
-from tempo.solver import Solver
+from config import config_agent
+from config.config_agent import FLAGS
+from solver import Solver
 
 
 class Train_solver(Solver):
@@ -19,6 +19,8 @@ class Train_solver(Solver):
         self.decay_steps = FLAGS['num_steps_per_decay']
         self.initial_learning_rate = FLAGS['initial_learning_rate']
         self.max_steps = FLAGS['max_steps']
+        self.step_per_summary = FLAGS['step_per_summary']
+        self.step_per_ckpt = FLAGS['step_per_ckpt']
         super(Train_solver, self).__init__()
 
     def build_graph(self):
@@ -65,12 +67,12 @@ class Train_solver(Solver):
                 print(format_str % (datetime.now(), step, loss_value,
                                     examples_per_sec, sec_per_batch))
 
-            if step % 100 == 0:
+            if step % self.step_per_summary == 0:
                 summary_str = self.sess.run(self.summary_op)
                 self.summary_writer.add_summary(summary_str, step)
 
             # Save the model checkpoint periodically.
-            if step % 1000 == 0 or (step + 1) == self.max_steps:
+            if step % self.step_per_ckpt == 0 or (step + 1) == self.max_steps:
                 checkpoint_path = os.path.join(self.dest_dir, 'model.ckpt')
                 self.saver.save(self.sess, checkpoint_path, global_step=step)
 

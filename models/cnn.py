@@ -8,9 +8,9 @@ Return:
 from __future__ import division
 import tensorflow as tf
 
-from tempo.config.config_agent import FLAGS, VARS
-from tempo.kits import variable_on_cpu, variable_with_weight_decay
-from tempo.models.model_proto import Model_proto
+from config.config_agent import FLAGS, VARS
+from kits import variable_on_cpu, variable_with_weight_decay
+from models.model_proto import Model_proto
 
 
 class Model(Model_proto):
