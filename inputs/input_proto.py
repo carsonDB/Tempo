@@ -18,6 +18,7 @@ class Input_proto(object):
         self.capacity = self.QUEUE['capacity']
         self.batch_size = FLAGS['batch_size']
         self.num_thread = self.QUEUE['num_thread']
+        self.num_class = self.INPUT['num_class']
         self.example_size = self.INPUT['example_size']
         self.sess = VARS['sess']
         self.coord = VARS['coord']
@@ -29,9 +30,6 @@ class Input_proto(object):
         # async (e.g. through a queue)
             # inputs -> inputs_batch
         inputs_batch = self.async(inputs)
-        # visualize preprocessed images
-        if inputs_batch.get_shape().as_list()[-1] == 3:
-            tf.image_summary('images', inputs_batch[0])
 
         return inputs_batch
 
@@ -53,7 +51,7 @@ class Input_proto(object):
                 capacity=self.capacity)
 
         # label: [batch, 1] -> [batch,]
-        inputs_batch[1] = tf.reshape(inputs_batch[1], [self.batch_size])
+        inputs_batch['Y'] = tf.reshape(inputs_batch['Y'], [self.batch_size])
         return inputs_batch
 
     def launch(self):

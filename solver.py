@@ -1,9 +1,9 @@
+from __future__ import division
 import sys
 from importlib import import_module
 import traceback
 import tensorflow as tf
 
-# import local files
 from config.config_agent import FLAGS, VARS
 
 
@@ -14,7 +14,7 @@ class Solver(object):
         self.gpus = FLAGS['gpus']
         self.OPT = FLAGS['optimizer']
         self.moving_average_decay = FLAGS['moving_average_decay']
-        self.learning_rate_decay_factor = FLAGS['decay_factor']
+        self.decay_factor = FLAGS['decay_factor']
         self.if_restart = VARS['if_restart']
         self.ckpt_dir = FLAGS['ckpt_dir']
         self.model_name = FLAGS['model']
@@ -32,11 +32,12 @@ class Solver(object):
             tf.gfile.DeleteRecursively(self.dest_dir)
             tf.gfile.MakeDirs(self.dest_dir)
 
-        with tf.Graph().as_default(), tf.device('/cpu:0'):
+        with tf.Graph().as_default() as self.graph, tf.device('/cpu:0'):
             try:
                 self.init_env()
                 self.build_graph()
                 self.init_graph()
+                # self.graph.finalize()
                 self.reader.launch()
                 self.launch_graph()
                 print('%s process closed normally\n' % VARS['mode'])
@@ -71,9 +72,9 @@ class Solver(object):
         lr = tf.train.exponential_decay(self.initial_learning_rate,
                                         self.global_step,
                                         self.decay_steps,
-                                        self.learning_rate_decay_factor,
+                                        self.decay_factor,
                                         staircase=True)
-        tf.scalar_summary('learning_rate', lr)
+        tf.summary.scalar('learning_rate', lr)
         self.learning_rate = lr
 
         if not hasattr(tf.train, '%sOptimizer' % name):
@@ -90,7 +91,7 @@ class Solver(object):
 
     def init_graph(self):
         # Build the summary operation based on the TF collection of Summaries.
-        self.summary_op = tf.merge_all_summaries()
+        self.summary_op = tf.summary.merge_all()
         self.saver = tf.train.Saver(tf.global_variables())
         # init session
         self.init_sess()
@@ -99,5 +100,5 @@ class Solver(object):
             ckpt = tf.train.get_checkpoint_state(self.ckpt_dir)
             self.saver.restore(self.sess, ckpt.model_checkpoint_path)
 
-        self.summary_writer = tf.train.SummaryWriter(self.dest_dir,
-                                                     self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter(self.dest_dir,
+                                                    self.sess.graph)

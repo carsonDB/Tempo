@@ -16,6 +16,7 @@ class Reader(Input_proto):
     """
     def __init__(self):
         super(Reader, self).__init__()
+        self.raw_size = self.INPUT['raw_size']
         self.data_dir = os.path.expanduser(FLAGS['data_path'])
 
     def get_data(self):
@@ -60,7 +61,7 @@ class Reader(Input_proto):
         # Subtract off the mean and divide by the variance of the pixels.
         float_image = tf.image.per_image_standardization(ts)
 
-        return float_image, label
+        return {'X': float_image, 'Y': label}
 
     def read_binary(self, filename_queue):
         """Reads and parses examples from cifar-data.

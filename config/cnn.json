@@ -35,6 +35,10 @@
     "batch_size": 129, // real: batch_size / num_gpus
     // num of gpus when multi-gpus solver runs
     "gpus": [0, 1, 2],
+    // iterations per summary for tensorboard
+    "step_per_summary": 100,
+    // iterations per save ckpt
+    "step_per_ckpt": 1000,
     // optimizer
     "optimizer": {
         "name": "GradientDescent"
@@ -69,7 +73,7 @@
             "min_remain": 20000,
             "num_thread": 16
         }
-    },  
+    },
     // eval info
     "@eval": {
         // content: path + label_id
@@ -92,17 +96,11 @@
             "capacity": 4384,
             "num_thread": 1
         },
-        // two modes (example, group of examples)
-        "@valid": {
-            "batch_size": 128
-        },
-        "@test": {
-            "batch_size": 1
-        }
+        "batch_size": 128
     },
 
     // graph info
-    "graph": [
+    "layers": [
         "CONV_5x5_K64", "POOL_3x3_S2", "LRN",
         "CONV_5x5_K64", "LRN", "POOL_3x3_S2",
         "FC_D384", "FC_D192"
@@ -120,8 +118,8 @@
             // input Shape [in_height, in_width, in_channels].
             "type": "conv2d",
             // filter Shape [filter_height, filter_width, in_channels, out_channels]
-                // in_channels: RGB 
-                //          or optical flow (x or y) 
+                // in_channels: RGB
+                //          or optical flow (x or y)
                 //          or number of last conv layer filters
                 // out_channels: number of filters
             "filter": [5, 5, -1, 64],

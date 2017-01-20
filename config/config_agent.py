@@ -1,6 +1,14 @@
+from __future__ import division
 import os
+import re
 import commentjson as cjson
 import argparse
+
+
+def clean_json(string):
+    string = re.sub(",[ \t\r\n]+}", "}", string)
+    string = re.sub(",[ \t\r\n]+\]", "]", string)
+    return string
 
 
 def load(config_name, mode=None):
@@ -14,7 +22,8 @@ def load(config_name, mode=None):
                          % file_path)
 
     with open(file_path) as f:
-        config = cjson.load(f)
+        json_str = clean_json(f.read())
+        config = cjson.loads(json_str)
 
     define_link(config)
 

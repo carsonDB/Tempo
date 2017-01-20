@@ -1,10 +1,11 @@
+from __future__ import division
 import tensorflow as tf
 
-# import local file
 from config.config_agent import FLAGS, VARS
 
 
 class Model_proto(object):
+
     def __init__(self):
         self.global_step = VARS['global_step']
         self.num_class = FLAGS['input']['num_class']
@@ -29,7 +30,7 @@ class Model_proto(object):
         labels = tf.cast(labels, tf.int64)
         # following function will softmax internally
         cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
-            logits, labels, name='cross_entropy_per_example')
+            logits=logits, labels=labels, name='cross_entropy_per_example')
         cross_entropy_mean = tf.reduce_mean(cross_entropy,
                                             name='cross_entropy')
         tf.add_to_collection('losses', cross_entropy_mean)
@@ -68,13 +69,10 @@ class Model_proto(object):
 
         # Name each loss as '(raw)' and name the moving average version of
         # the loss as the original loss name.
-        tf.scalar_summary(loss.op.name + ' (raw)', loss)
-        tf.scalar_summary(loss.op.name, loss_averages.average(loss))
+        tf.summary.scalar(loss.op.name + ' (raw)', loss)
+        tf.summary.scalar(loss.op.name, loss_averages.average(loss))
 
         return loss_averages_op
 
     def eval(self, logits, labels, top):
         return tf.nn.in_top_k(logits, labels, top)
-
-    def test(self):
-        raise ValueError('your model need own test method')

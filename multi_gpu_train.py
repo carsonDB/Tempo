@@ -67,10 +67,10 @@ class Multi_gpu_solver(Solver):
 
     def build_graph(self):
         # Build a Graph that computes the logits predictions.
-        inputs, labels = self.reader.read()
+        inputs = self.reader.read()
         # split into num_gpus groups
-        inputs_lst = tf.split(0, self.num_gpus, inputs)
-        labels_lst = tf.split(0, self.num_gpus, labels)
+        inputs_lst = tf.split(0, self.num_gpus, inputs['X'])
+        labels_lst = tf.split(0, self.num_gpus, inputs['Y'])
         # get optimizer
         opt = self.get_opt()
         # Calculate the gradients for each model tower.
@@ -117,8 +117,7 @@ class Multi_gpu_solver(Solver):
         self.summary_op = tf.merge_summary(self.summaries)
         self.saver = tf.train.Saver(tf.global_variables())
         # initialize variables
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
+        self.init_sess()
         # restore variables if any
         if self.if_restart is False:
             ckpt = tf.train.get_checkpoint_state(self.ckpt_dir)
@@ -138,7 +137,7 @@ class Multi_gpu_solver(Solver):
             if step % 10 == 0:
                 num_examples_per_step = self.batch_size
                 examples_per_sec = num_examples_per_step / duration
-                sec_per_batch = duration / self.num_gpus
+                sec_per_batch = duration
 
                 format_str = ('%s: step %d, '
                               'loss = %.2f (%.1f examples/sec; %.3f '

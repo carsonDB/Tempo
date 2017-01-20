@@ -37,9 +37,11 @@ class Output_solver(Solver):
     def build_graph(self):
         with tf.device('/gpu:%d' % self.gpus[0]):
             # Build a Graph that computes the logits predictions.
-            inputs, labels = self.reader.read()
+            inputs = self.reader.read()
             # inference model.
-            logits = self.model.infer(inputs)
+            logits = self.model.infer(inputs['X'])
+            # scale logits
+            VARS['output']['scaled_logits'] = tf.nn.softmax(logits)
 
     def launch_graph(self):
         if self.num_examples % self.batch_size != 0:
@@ -62,7 +64,7 @@ class Output_solver(Solver):
         # write into a hdf5 file
         if tf.gfile.Exists(self.output_path):
             tf.gfile.Remove(self.output_path)
-            tf.gfile.MakeDirs(os.path.dirname(self.output_path))
+        tf.gfile.MakeDirs(os.path.dirname(self.output_path))
 
         with h5py.File(self.output_path, 'w') as f:
             # create datasets

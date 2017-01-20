@@ -17,7 +17,6 @@ class Reader(Input_proto):
 
     def get_data(self):
         filenames = [self.data_path]
-
         for f in filenames:
             if not tf.gfile.Exists(f):
                 raise ValueError('Failed to find file: ' + f)
@@ -44,4 +43,4 @@ class Reader(Input_proto):
         feature = tf.decode_raw(example['feature_raw'], tf.float32)
         feature = tf.reshape(feature, self.example_size)
 
-        return feature, label
+        return {'X': feature, 'Y': label}

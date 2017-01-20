@@ -1,6 +1,7 @@
 """
 train in a single GPU.
 """
+from __future__ import division
 import os
 import time
 from datetime import datetime
@@ -25,15 +26,15 @@ class Train_solver(Solver):
 
     def build_graph(self):
         # Build a Graph that computes the logits predictions.
-        inputs, labels = self.reader.read()
+        inputs = self.reader.read()
         # get optimizer
         opt = self.get_opt()
 
         with tf.device('/gpu:%d' % self.gpus[0]):
             # inference model.
-            logits = self.model.infer(inputs)
+            logits = self.model.infer(inputs['X'])
             # Calculate loss (cross_entropy and weights).
-            self.loss = self.model.loss(logits, labels)
+            self.loss = self.model.loss(logits, inputs['Y'])
             # Calculate the gradients for the batch of data
             grads = self.model.grad(opt, self.loss)
         # Apply gradients.
@@ -78,6 +79,7 @@ class Train_solver(Solver):
 
 
 def main(argv=None):
+
     # unroll arguments of train
     config_agent.init_FLAGS('train')
     Train_solver().start()

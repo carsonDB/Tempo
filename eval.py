@@ -25,11 +25,11 @@ class Eval_solver(Solver):
     def build_graph(self):
         with tf.device('/gpu:%d' % self.gpus[-1]):
              # Build a Graph that computes the logits predictions.
-            inputs, labels = self.reader.read()
+            inputs = self.reader.read()
             # inference model.
-            logits = self.model.infer(inputs)
+            logits = self.model.infer(inputs['X'])
             # Calculate predictions.
-            self.top_k_op = self.model.eval(logits, labels, self.num_top)
+            self.top_k_op = self.model.eval(logits, inputs['Y'], self.num_top)
 
     def init_graph(self):
         self.init_sess()
@@ -39,8 +39,8 @@ class Eval_solver(Solver):
         variables_to_restore = variable_averages.variables_to_restore()
         self.saver = tf.train.Saver(variables_to_restore)
         # Build the summary operation based on the TF collection of Summaries.
-        self.summary_writer = tf.train.SummaryWriter(self.dest_dir,
-                                                     self.sess.graph)
+        self.summary_writer = tf.summary.FileWriter(self.dest_dir,
+                                                    self.sess.graph)
 
     def launch_graph(self):
         while True:
